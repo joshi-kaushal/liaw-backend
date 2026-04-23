@@ -1,0 +1,26 @@
+# Core
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+pydantic==2.11.2
+pydantic-settings==2.9.1
+
+# Database
+sqlalchemy[asyncio]==2.0.40
+asyncpg==0.30.0
+alembic==1.15.2
+
+# Auth
+pyjwt==2.10.1
+passlib==1.7.4
+
+# HTTP client (WhatsApp API)
+httpx==0.28.1
+
+# Testing
+pytest==8.3.5
+pytest-asyncio==0.26.0
+httpx  # also used as test client
+
+# Utilities
+python-multipart==0.0.20
+python-dotenv==1.1.0
