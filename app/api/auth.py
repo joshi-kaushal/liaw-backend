@@ -20,7 +20,7 @@ from app.services.auth_service import (
     verify_otp,
     create_access_token,
 )
-from app.services.whatsapp_service import send_otp_message
+from app.services.whatsapp_service import send_text_message
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +43,9 @@ async def request_otp(
     # Generate OTP
     code = await create_otp(db, user.id)
 
+    message = f"🔐 Your OTP to sign into the Live in a Weeek app is: <b>{code}</b>"
     # Send OTP via WhatsApp
-    sent = await send_otp_message(body.phone_number, code)
+    sent = await send_text_message(body.phone_number, message)
     if not sent:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,

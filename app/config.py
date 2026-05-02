@@ -14,11 +14,16 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRY_HOURS: int = 168  # 7 days
 
-    # Meta / WhatsApp Cloud API
-    META_PHONE_NUMBER_ID: str = ""
-    META_ACCESS_TOKEN: str = ""
-    META_VERIFY_TOKEN: str = ""
-    META_APP_SECRET: str = ""
+    # Odyssey Gateway — used for sending WhatsApp replies and validating inbound webhooks.
+    ODYSSEY_URL: str = "http://host.docker.internal:3000"
+    ODYSSEY_API_KEY: str = "your_super_secret_api_key_here"       # must match GATEWAY_API_KEY on the Odyssey side
+    ODYSSEY_WEBHOOK_SECRET: str = "LIAW_WEBHOOK_SECRET" # must match webhook_secret in Odyssey config.json
+
+    # Meta / WhatsApp Cloud API — commented out; replaced by Odyssey integration.
+    # META_PHONE_NUMBER_ID: str = ""
+    # META_ACCESS_TOKEN: str = ""
+    # META_VERIFY_TOKEN: str = ""
+    # META_APP_SECRET: str = ""
 
     # CORS
     CORS_ORIGINS: str = '["http://localhost:5173"]'

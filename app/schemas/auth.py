@@ -9,7 +9,7 @@ class OTPRequest(BaseModel):
         ...,
         pattern=r"^\+[1-9]\d{6,14}$",
         description="Phone number in E.164 format, e.g. +919876543210",
-        examples=["+919876543210"],
+        examples=["+918082446387"],
     )
 
 

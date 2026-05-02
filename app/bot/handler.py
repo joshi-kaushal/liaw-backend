@@ -24,7 +24,7 @@ Available commands:
 """.strip()
 
 
-async def handle_whatsapp_message(db: AsyncSession, phone_number: str, message_text: str):
+async def handle_whatsapp_message(db: AsyncSession, phone_number: str, message_text: str, push_name: str | None = None):
     """Entry point for handling an incoming WhatsApp message."""
     # Ensure phone number has + prefix
     if not phone_number.startswith("+"):
@@ -34,6 +34,10 @@ async def handle_whatsapp_message(db: AsyncSession, phone_number: str, message_t
 
     # Find user
     user = await auth_service.get_or_create_user(db, phone_number)
+    # Update display_name from WhatsApp pushName if not set yet
+    if push_name and not user.display_name:
+        user.display_name = push_name
+        await db.flush()
 
     # Handle /otp command (Brilliant workaround!)
     if command == "/otp":

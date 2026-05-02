@@ -20,6 +20,7 @@ async def get_or_create_user(db: AsyncSession, phone_number: str) -> User:
         user = User(
             id=uuid.uuid4(),
             phone_number=phone_number,
+            display_name=None,
             is_verified=False,
         )
         db.add(user)
