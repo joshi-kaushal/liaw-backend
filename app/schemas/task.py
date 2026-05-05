@@ -41,7 +41,7 @@ class TaskBase(BaseModel):
 
 
 class TaskCreate(TaskBase):
-    pass
+    id: uuid.UUID | None = None
 
 
 class TaskUpdate(BaseModel):

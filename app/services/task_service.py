@@ -56,11 +56,14 @@ async def get_task(db: AsyncSession, user_id: uuid.UUID, task_id: uuid.UUID) -> 
 async def create_task(
     db: AsyncSession, user_id: uuid.UUID, task_in: TaskCreate
 ) -> Task:
-    """Create a new task."""
+    """Create a new task. Client may provide id; otherwise server generates one."""
+    data = task_in.model_dump()
+    client_id = data.pop("id", None)
     task = Task(
-        **task_in.model_dump(),
+        **data,
         user_id=user_id,
         version=1,
+        **({"id": client_id} if client_id else {}),
     )
     db.add(task)
     await db.flush()
@@ -93,9 +96,9 @@ async def update_task(
 async def delete_task(db: AsyncSession, user_id: uuid.UUID, task_id: uuid.UUID) -> Task:
     """Soft delete a task."""
     task = await get_task(db, user_id, task_id)
-    
+
     task.deleted_at = datetime.now(timezone.utc)
     task.version += 1
-    
+
     await db.flush()
     return task
