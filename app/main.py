@@ -8,8 +8,6 @@ from app.api.auth import router as auth_router
 from app.api.tasks import router as tasks_router
 from app.api.sync import router as sync_router
 from app.api.webhook import router as webhook_router
-import app.models  # noqa: F401 — ensure all models register with SQLAlchemy before any mapper init
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -24,7 +22,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Live in a Week API",
     description="Backend for the Live in a Week browser extension",
-    version="0.1.0",
+    version="1.0.0",
     lifespan=lifespan,
 )
 
@@ -40,7 +38,7 @@ app.add_middleware(
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "version": "0.1.0"}
+    return {"status": "ok", "version": "1.0.0"}
 
 
 # --- Routers ---
