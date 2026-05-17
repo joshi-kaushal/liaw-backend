@@ -46,6 +46,7 @@ services:
       - "${BACKEND_PORT:-8001}:8000"
     volumes:
       - ./app:/code/app
+      - ./alembic:/code/alembic
     depends_on:
       db:
         condition: service_healthy
