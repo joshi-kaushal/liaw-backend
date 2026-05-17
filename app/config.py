@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import List
 import json
@@ -8,6 +9,16 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://liaw:liaw_dev_pass@db:5432/liaw"
+
+    @field_validator("DATABASE_URL", mode="after")
+    @classmethod
+    def _ensure_asyncpg_driver(cls, v: str) -> str:
+        # Railway's Postgres plugin hands out postgresql:// — SQLAlchemy's async
+        # engine needs the +asyncpg driver suffix. Normalise here so every
+        # caller (engine, Alembic) can use settings.DATABASE_URL unchanged.
+        if v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
 
     # JWT
     JWT_SECRET: str = "change-me"
