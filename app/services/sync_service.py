@@ -47,7 +47,7 @@ async def process_sync_change(
         )
         db.add(task)
         await db.flush()
-        
+
         return SyncResult(
             id=change.id,
             status="accepted",
