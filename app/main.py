@@ -8,6 +8,7 @@ from app.api.auth import router as auth_router
 from app.api.tasks import router as tasks_router
 from app.api.sync import router as sync_router
 from app.api.webhook import router as webhook_router
+from app.api.privacy import router as privacy_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -46,3 +47,4 @@ app.include_router(auth_router)
 app.include_router(tasks_router)
 app.include_router(sync_router)
 app.include_router(webhook_router)
+app.include_router(privacy_router)
