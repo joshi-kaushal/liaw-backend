@@ -32,13 +32,12 @@ async def process_sync_change(
     task = result.scalar_one_or_none()
 
     if not task:
-        # Task doesn't exist on server, create it
-        new_task_data = change.task_data.copy()
-        
-        # Clean up client-only or protected fields before inserting
-        for field in ["id", "user_id", "created_at", "updated_at", "version"]:
-            new_task_data.pop(field, None)
-            
+        # Task doesn't exist on server, create it.
+        # model_dump yields proper datetime/date objects (Pydantic already
+        # coerced the client's ISO strings); id/user_id/version are set
+        # server-side, so exclude id and let the others be assigned explicitly.
+        new_task_data = change.task_data.model_dump(exclude={"id"})
+
         task = Task(
             id=change.id,
             user_id=user_id,
@@ -63,19 +62,12 @@ async def process_sync_change(
             server_task=TaskResponse.model_validate(task)
         )
 
-    # Accept change
-    update_data = change.task_data.copy()
-    for field in ["id", "user_id", "created_at", "updated_at", "version"]:
-        update_data.pop(field, None)
-        
+    # Accept change — full-object replace (sync is last-write-wins on the
+    # whole snapshot). Values are already typed by Pydantic.
+    update_data = change.task_data.model_dump(exclude={"id"})
+
     for field, value in update_data.items():
         if hasattr(task, field):
-            # Parse datetime strings to proper datetime objects if needed
-            if field in ["completed_at", "deleted_at"] and isinstance(value, str):
-                try:
-                    value = datetime.fromisoformat(value.replace("Z", "+00:00"))
-                except ValueError:
-                    pass
             setattr(task, field, value)
 
     task.version += 1
@@ -96,7 +88,11 @@ async def push_changes(
     results = []
     for change in changes:
         try:
-            result = await process_sync_change(db, user_id, change)
+            # SAVEPOINT per change: a failed flush rolls back only this
+            # change, leaving the outer transaction usable so one bad
+            # change can't poison the rest of the batch (or the final commit).
+            async with db.begin_nested():
+                result = await process_sync_change(db, user_id, change)
             results.append(result)
         except Exception as e:
             results.append(
