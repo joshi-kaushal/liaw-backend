@@ -144,7 +144,7 @@ PRIVACY_HTML = f"""<!doctype html>
       <li><strong>Deletion</strong> — request deletion of your account and all associated tasks.</li>
     </ul>
     <p>
-      To exercise any of these rights, email <a href="mailto:kaushal.joshi@truboardpartners.com">kaushal.joshi@truboardpartners.com</a>
+      To exercise any of these rights, email <a href="mailto:7joshikaushal@gmail.com">7joshikaushal@gmail.com</a>
       from the phone number associated with your account or include it in the message body.
     </p>
 
@@ -168,7 +168,7 @@ PRIVACY_HTML = f"""<!doctype html>
     <h2>10. Contact</h2>
     <p>
       Questions or data requests:
-      <a href="mailto:kaushal.joshi@truboardpartners.com">kaushal.joshi@truboardpartners.com</a>
+      <a href="mailto:7joshikaushal@gmail.com">7joshikaushal@gmail.com</a>
     </p>
 
     <footer>
