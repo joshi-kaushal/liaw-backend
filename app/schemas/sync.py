@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from pydantic import BaseModel
-from app.schemas.task import TaskResponse
+from app.schemas.task import TaskCreate, TaskResponse
 
 
 class SyncPullResponse(BaseModel):
@@ -10,9 +10,16 @@ class SyncPullResponse(BaseModel):
     sync_timestamp: datetime
 
 
+class SyncTaskData(TaskCreate):
+    # Sync carries soft-deletes; TaskCreate doesn't expose deleted_at.
+    # Inherits TaskCreate's typed fields so Pydantic coerces ISO strings
+    # into datetime/date and rejects malformed JSONB payloads.
+    deleted_at: datetime | None = None
+
+
 class SyncChange(BaseModel):
     id: uuid.UUID
-    task_data: dict  # Full task data from the client
+    task_data: SyncTaskData  # Full task snapshot from the client (last-write-wins)
     client_version: int
 
 
