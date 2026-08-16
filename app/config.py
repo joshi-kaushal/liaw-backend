@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # JWT
     JWT_SECRET: str = "change-me"
     JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRY_HOURS: int = 168  # 7 days
+    JWT_EXPIRY_HOURS: int = 8760 # 365 days
 
     # Odyssey Gateway — used for sending WhatsApp replies and validating inbound webhooks.
     ODYSSEY_URL: str = "http://host.docker.internal:3000"
