@@ -37,6 +37,9 @@ class Task(Base):
     # Scheduling
     due_date: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
     due_time: Mapped[str | None] = mapped_column(String(5), nullable=True)  # HH:mm
+    estimated_duration_minutes: Mapped[int | None] = mapped_column(
+        Integer, nullable=True
+    )  # Estimated time to complete
 
     # Priority & Energy
     energy_level: Mapped[str] = mapped_column(String(10), default="medium")

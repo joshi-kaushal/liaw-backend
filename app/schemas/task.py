@@ -29,6 +29,9 @@ class TaskBase(BaseModel):
     completed_at: datetime | None = None
     due_date: date | None = None
     due_time: str | None = Field(None, pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$")
+    estimated_duration_minutes: int | None = Field(
+        None, ge=1, description="Estimated time to complete in minutes"
+    )
     energy_level: str = Field("medium", pattern="^(low|medium|high)$")
     priority: str = Field("medium", pattern="^(low|medium|high)$")
     priority_override: bool = False
@@ -51,6 +54,9 @@ class TaskUpdate(BaseModel):
     completed_at: datetime | None = None
     due_date: date | None = None
     due_time: str | None = Field(None, pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$")
+    estimated_duration_minutes: int | None = Field(
+        None, ge=1, description="Estimated time to complete in minutes"
+    )
     energy_level: str | None = Field(None, pattern="^(low|medium|high)$")
     priority: str | None = Field(None, pattern="^(low|medium|high)$")
     priority_override: bool | None = None
