@@ -43,7 +43,7 @@ async def request_otp(
     # Generate OTP
     code = await create_otp(db, user.id)
 
-    message = f"🔐 Your OTP to sign into the Live in a Week app is: {code}."
+    message = f"🔐 Your OTP to sign into the Live in a Week app is: *{code}*"
     # Send OTP via WhatsApp
     sent = await send_text_message(body.phone_number, message)
     if not sent:
