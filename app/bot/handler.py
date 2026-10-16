@@ -1,9 +1,12 @@
 import logging
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.bot.parser import parse_command
+from app.bot.when import parse_add_input, format_confirmation_message
+from app.config import settings
 from app.models.user import User
 from app.schemas.task import TaskCreate, TaskFilterParams
 from app.services import task_service, auth_service
@@ -17,7 +20,7 @@ HELP_TEXT = """
 Available commands:
 • `/today` - Show today's tasks
 • `/week` - Show pending tasks for this week
-• `/add <task>` - Add a new task for today
+• `/add [<when>] <task>` - Add a new task
 • `/done <number>` - Complete a task
 • `/delete <number>` - Delete a task
 • `/otp` - Get a login code for the extension
@@ -91,7 +94,8 @@ async def handle_whatsapp_message(db: AsyncSession, phone_number: str, message_t
 
 
 async def _handle_today(db: AsyncSession, user_id, phone_number: str):
-    today = datetime.now(timezone.utc).date()
+    tz = ZoneInfo(settings.DEFAULT_TIMEZONE)
+    today = datetime.now(tz).date()
     filters = TaskFilterParams(start_date=today, end_date=today, status="pending")
     tasks = await task_service.get_tasks(db, user_id, filters)
     
@@ -101,14 +105,16 @@ async def _handle_today(db: AsyncSession, user_id, phone_number: str):
 
     lines = ["📋 *Today's Tasks*:"]
     for i, t in enumerate(tasks, 1):
-        lines.append(f"{i}. [ ] {t.title}")
+        time_suffix = f" ({t.due_time})" if t.due_time else ""
+        lines.append(f"{i}. [ ] {t.title}{time_suffix}")
     
     await send_text_message(phone_number, "\n".join(lines))
 
 
 async def _handle_week(db: AsyncSession, user_id, phone_number: str):
-    today = datetime.now(timezone.utc).date()
-    # Calculate days to Sunday (6 = Sunday in Python, but let's just do next 7 days for simplicity)
+    tz = ZoneInfo(settings.DEFAULT_TIMEZONE)
+    today = datetime.now(tz).date()
+    # Calculate next 7 days
     end_of_week = today + timedelta(days=7)
     
     filters = TaskFilterParams(start_date=today, end_date=end_of_week, status="pending")
@@ -121,18 +127,31 @@ async def _handle_week(db: AsyncSession, user_id, phone_number: str):
     lines = ["📋 *This Week's Pending Tasks*:"]
     for i, t in enumerate(tasks, 1):
         due = t.due_date.strftime("%a") if t.due_date else "Anyday"
-        lines.append(f"{i}. [ ] {t.title} ({due})")
+        time_suffix = f" {t.due_time}" if t.due_time else ""
+        lines.append(f"{i}. [ ] {t.title} ({due}{time_suffix})")
     
     await send_text_message(phone_number, "\n".join(lines))
 
 
-async def _handle_add(db: AsyncSession, user_id, phone_number: str, title: str):
+async def _handle_add(db: AsyncSession, user_id, phone_number: str, raw_text: str):
+    tz = ZoneInfo(settings.DEFAULT_TIMEZONE)
+    schedule, title = parse_add_input(raw_text, tz)
+
+    if not title:
+        await send_text_message(
+            phone_number,
+            "❌ Please provide a task title. Example: `/add tomorrow 5pm Team meeting`",
+        )
+        return
+
     task_in = TaskCreate(
         title=title,
-        due_date=datetime.now(timezone.utc).date(),
+        due_date=schedule.due_date,
+        due_time=schedule.due_time,
     )
     task = await task_service.create_task(db, user_id, task_in)
-    await send_text_message(phone_number, f"✅ Added: *{task.title}*")
+    confirmation = format_confirmation_message(task.title, schedule, tz)
+    await send_text_message(phone_number, confirmation)
 
 
 async def _handle_done(db: AsyncSession, user_id, phone_number: str, index: int):
