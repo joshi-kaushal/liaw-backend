@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> List[str]:
         return json.loads(self.CORS_ORIGINS)
 
+    # Timezone
+    DEFAULT_TIMEZONE: str = "Asia/Kolkata"
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 
